@@ -5,10 +5,7 @@ import Debug exposing (toString)
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-
-
-type alias UserID =
-    String
+import Html.Events exposing (onMouseLeave, onMouseOver)
 
 
 type alias FilledCell =
@@ -27,13 +24,14 @@ type alias CellContent =
 
 
 type alias Sheet =
-    Dict String (Dict String CellContent)
+    Dict ( String, String ) CellContent
 
 
 type alias Model =
     { row_names : List String
     , column_names : List String
     , cells : Sheet
+    , focusCell : Maybe ( String, String )
     }
 
 
@@ -42,14 +40,24 @@ type alias Model =
 -- That works out to a list of rows and a list of cols (both ordered) and a list of values at certain intersections
 
 
-type alias Msg =
-    String
+type Msg
+    = Highlight String String
+    | KillHighlight
+
+
+
+-- Styles
+
+
+cellStyle : List (Attribute Msg)
+cellStyle =
+    [ style "border" "1px solid black", style "text-align" "center", style "width" "60px", style "min-width" "60px" ]
 
 
 columnNames : List String -> List (Html Msg)
 columnNames column_names =
     List.map
-        (\name -> th [ style "border" "1px solid black", scope "col" ] [ text name ])
+        (\name -> th ([ scope "col", style "background" borderColor ] ++ cellStyle) [ text name ])
         column_names
 
 
@@ -60,8 +68,24 @@ headers model =
     ]
 
 
-intensityToColor : Int -> String
-intensityToColor i =
+borderColor =
+    "#bfdadaff"
+
+
+highlightColor =
+    "#b1add1ff"
+
+
+partialHighlightColor =
+    "#e2e1eeff"
+
+
+emptyColor =
+    "#f3f3f3ff"
+
+
+cellColor : Int -> String
+cellColor i =
     case i of
         0 ->
             "#FF0000"
@@ -90,46 +114,87 @@ intensityToColor i =
         9 ->
             "#5EE600"
 
-        default ->
-            "grey"
+        _ ->
+            emptyColor
 
 
-formatCell : Sheet -> String -> String -> Html Msg
-formatCell sheet row col =
-    case Dict.get row sheet of
-        Just c ->
-            case Dict.get col c of
-                Just cellContent ->
-                    td
-                        [ style "border" "1px solid black"
-                        , style "background"
-                            (intensityToColor
-                                cellContent
-                            )
-                        ]
-                        [ text (toString cellContent) ]
+formatCell : Sheet -> String -> String -> Maybe ( String, String ) -> Html Msg
+formatCell sheet row col focus =
+    let
+        isFocused =
+            case focus of
+                Just ( r, c ) ->
+                    row == r && col == c
 
                 Nothing ->
-                    td [ style "border" "1px solid black", style "background" "" ] [ text " " ]
+                    False
 
-        Nothing ->
-            td [ style "border" "1px solid black", style "background" "" ] [ text " " ]
+        isPartialFocus =
+            case focus of
+                Just ( r, c ) ->
+                    row == r || col == c
+
+                Nothing ->
+                    False
+
+        contents =
+            Dict.get ( row, col ) sheet
+
+        color =
+            if isFocused then
+                highlightColor
+
+            else if isPartialFocus then
+                partialHighlightColor
+
+            else
+                case contents of
+                    Just i ->
+                        cellColor i
+
+                    Nothing ->
+                        emptyColor
+
+        label =
+            case contents of
+                Just i ->
+                    toString i
+
+                Nothing ->
+                    " "
+    in
+    td
+        ([ style "background"
+            color
+         , onMouseOver (Highlight row col)
+         , onMouseLeave KillHighlight
+         ]
+            ++ cellStyle
+        )
+        [ text label ]
 
 
 rows : Model -> List (Html Msg)
 rows model =
     List.map
-        (\r -> tr [] (th [ style "border" "1px solid black", scope "row" ] [ text r ] :: List.map (\c -> formatCell model.cells r c) model.column_names))
+        (\r -> tr [] (th ([ scope "row", style "background" borderColor ] ++ cellStyle) [ text r ] :: List.map (\c -> formatCell model.cells r c model.focusCell) model.column_names))
         model.row_names
 
 
 tableView : Model -> Html Msg
 tableView model =
     table
-        []
+        [ style "aspect-ratio" "1 / 1" ]
         (headers model
             ++ rows model
         )
+
+
+type alias Cell =
+    { concept : String
+    , descriptor : String
+    , intensity : Int
+    }
 
 
 initialModel : Model
@@ -138,14 +203,19 @@ initialModel =
     , column_names = [ "bright", "loud", "spicy", "crunchy", "shrill", "rough", "smooth", "shiny", "bitter" ]
     , cells =
         Dict.fromList
-            [ ( "the sun", Dict.fromList [ ( "spicy", 5 ) ] )
-            ]
+            [ ( ( "the sun", "spicy" ), 8 ) ]
+    , focusCell = Nothing
     }
 
 
 update : Msg -> Model -> Model
 update msg model =
-    model
+    case msg of
+        Highlight row col ->
+            { model | focusCell = Just ( row, col ) }
+
+        KillHighlight ->
+            { model | focusCell = Nothing }
 
 
 main : Program () Model Msg

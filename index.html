@@ -4611,12 +4611,8 @@ var $author$project$Main$initialModel = {
 		_List_fromArray(
 			[
 				_Utils_Tuple2(
-				'the sun',
-				$elm$core$Dict$fromList(
-					_List_fromArray(
-						[
-							_Utils_Tuple2('spicy', 5)
-						])))
+				_Utils_Tuple2('the sun', 'spicy'),
+				8)
 			])),
 	column_names: _List_fromArray(
 		['bright', 'loud', 'spicy', 'crunchy', 'shrill', 'rough', 'smooth', 'shiny', 'bitter']),
@@ -5334,6 +5330,13 @@ var $elm$browser$Browser$sandbox = function (impl) {
 			view: impl.view
 		});
 };
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $author$project$Main$cellStyle = _List_fromArray(
+	[
+		A2($elm$html$Html$Attributes$style, 'border', '1px solid black'),
+		A2($elm$html$Html$Attributes$style, 'text-align', 'center')
+	]);
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -5343,8 +5346,6 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$scope = $elm$html$Html$Attributes$stringProperty('scope');
-var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$th = _VirtualDom_node('th');
@@ -5354,11 +5355,10 @@ var $author$project$Main$columnNames = function (column_names) {
 		function (name) {
 			return A2(
 				$elm$html$Html$th,
-				_List_fromArray(
-					[
-						A2($elm$html$Html$Attributes$style, 'border', '1px solid black'),
-						$elm$html$Html$Attributes$scope('col')
-					]),
+				A2(
+					$elm$core$List$cons,
+					$elm$html$Html$Attributes$scope('col'),
+					$author$project$Main$cellStyle),
 				_List_fromArray(
 					[
 						$elm$html$Html$text(name)
@@ -5437,48 +5437,30 @@ var $elm$html$Html$td = _VirtualDom_node('td');
 var $elm$core$Debug$toString = _Debug_toString;
 var $author$project$Main$formatCell = F3(
 	function (sheet, row, col) {
-		var _v0 = A2($elm$core$Dict$get, row, sheet);
+		var _v0 = A2(
+			$elm$core$Dict$get,
+			_Utils_Tuple2(row, col),
+			sheet);
 		if (_v0.$ === 'Just') {
-			var c = _v0.a;
-			var _v1 = A2($elm$core$Dict$get, col, c);
-			if (_v1.$ === 'Just') {
-				var cellContent = _v1.a;
-				return A2(
-					$elm$html$Html$td,
-					_List_fromArray(
-						[
-							A2($elm$html$Html$Attributes$style, 'border', '1px solid black'),
-							A2(
-							$elm$html$Html$Attributes$style,
-							'background',
-							$author$project$Main$intensityToColor(cellContent))
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text(
-							$elm$core$Debug$toString(cellContent))
-						]));
-			} else {
-				return A2(
-					$elm$html$Html$td,
-					_List_fromArray(
-						[
-							A2($elm$html$Html$Attributes$style, 'border', '1px solid black'),
-							A2($elm$html$Html$Attributes$style, 'background', '')
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text(' ')
-						]));
-			}
+			var content = _v0.a;
+			return A2(
+				$elm$html$Html$td,
+				A2(
+					$elm$core$List$cons,
+					A2(
+						$elm$html$Html$Attributes$style,
+						'background',
+						$author$project$Main$intensityToColor(content)),
+					$author$project$Main$cellStyle),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$elm$core$Debug$toString(content))
+					]));
 		} else {
 			return A2(
 				$elm$html$Html$td,
-				_List_fromArray(
-					[
-						A2($elm$html$Html$Attributes$style, 'border', '1px solid black'),
-						A2($elm$html$Html$Attributes$style, 'background', '')
-					]),
+				$author$project$Main$cellStyle,
 				_List_fromArray(
 					[
 						$elm$html$Html$text(' ')
@@ -5496,11 +5478,10 @@ var $author$project$Main$rows = function (model) {
 					$elm$core$List$cons,
 					A2(
 						$elm$html$Html$th,
-						_List_fromArray(
-							[
-								A2($elm$html$Html$Attributes$style, 'border', '1px solid black'),
-								$elm$html$Html$Attributes$scope('row')
-							]),
+						A2(
+							$elm$core$List$cons,
+							$elm$html$Html$Attributes$scope('row'),
+							$author$project$Main$cellStyle),
 						_List_fromArray(
 							[
 								$elm$html$Html$text(r)
@@ -5518,7 +5499,10 @@ var $elm$html$Html$table = _VirtualDom_node('table');
 var $author$project$Main$tableView = function (model) {
 	return A2(
 		$elm$html$Html$table,
-		_List_Nil,
+		_List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'aspect-ratio', '1 / 1')
+			]),
 		_Utils_ap(
 			$author$project$Main$headers(model),
 			$author$project$Main$rows(model)));
