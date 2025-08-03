@@ -4464,6 +4464,7 @@ var $elm$core$Set$toList = function (_v0) {
 var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Basics$LT = {$: 'LT'};
+var $elm$core$Maybe$Nothing = {$: 'Nothing'};
 var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
 var $elm$core$List$foldl = F3(
@@ -4615,9 +4616,10 @@ var $author$project$Main$initialModel = {
 				8)
 			])),
 	column_names: _List_fromArray(
-		['bright', 'loud', 'spicy', 'crunchy', 'shrill', 'rough', 'smooth', 'shiny', 'bitter']),
+		['bright', 'loud', 'spicy', 'crunchy', 'shrill', 'rough', 'smooth', 'shiny', 'bitter', 'hot', 'cold', 'dry', 'wet', 'heavy', 'light', 'gooey', 'oily', 'creamy', 'salty', 'blurry', 'quiet']),
+	focusCell: $elm$core$Maybe$Nothing,
 	row_names: _List_fromArray(
-		['the sun', 'the moon', 'truth', 'friendship', 'intelligence', 'coffee', 'love', 'sex', 'sleep', 'justice', 'thinking'])
+		['the sun', 'the moon', 'truth', 'friendship', 'intelligence', 'coffee', 'love', 'sex', 'sleep', 'justice', 'thinking', 'safety', 'money', 'confusion', 'certainty'])
 };
 var $elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
@@ -4645,7 +4647,6 @@ var $elm$core$Basics$add = _Basics_add;
 var $elm$core$Maybe$Just = function (a) {
 	return {$: 'Just', a: a};
 };
-var $elm$core$Maybe$Nothing = {$: 'Nothing'};
 var $elm$core$String$all = _String_all;
 var $elm$core$Basics$and = _Basics_and;
 var $elm$core$Basics$append = _Utils_append;
@@ -5330,12 +5331,17 @@ var $elm$browser$Browser$sandbox = function (impl) {
 			view: impl.view
 		});
 };
+var $author$project$Main$borderColor = '#bfdadaff';
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $author$project$Main$cellStyle = _List_fromArray(
 	[
 		A2($elm$html$Html$Attributes$style, 'border', '1px solid black'),
-		A2($elm$html$Html$Attributes$style, 'text-align', 'center')
+		A2($elm$html$Html$Attributes$style, 'text-align', 'center'),
+		A2($elm$html$Html$Attributes$style, 'width', '60px'),
+		A2($elm$html$Html$Attributes$style, 'min-width', '60px'),
+		A2($elm$html$Html$Attributes$style, 'height', '60px'),
+		A2($elm$html$Html$Attributes$style, 'height', '60px')
 	]);
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
@@ -5355,9 +5361,12 @@ var $author$project$Main$columnNames = function (column_names) {
 		function (name) {
 			return A2(
 				$elm$html$Html$th,
-				A2(
-					$elm$core$List$cons,
-					$elm$html$Html$Attributes$scope('col'),
+				_Utils_ap(
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$scope('col'),
+							A2($elm$html$Html$Attributes$style, 'background', $author$project$Main$borderColor)
+						]),
 					$author$project$Main$cellStyle),
 				_List_fromArray(
 					[
@@ -5376,6 +5385,36 @@ var $author$project$Main$headers = function (model) {
 			$author$project$Main$columnNames(
 				A2($elm$core$List$cons, ' ', model.column_names)))
 		]);
+};
+var $author$project$Main$Highlight = F2(
+	function (a, b) {
+		return {$: 'Highlight', a: a, b: b};
+	});
+var $author$project$Main$KillHighlight = {$: 'KillHighlight'};
+var $author$project$Main$emptyColor = '#fdfaefff';
+var $author$project$Main$cellColor = function (i) {
+	switch (i) {
+		case 0:
+			return '#FF0000';
+		case 1:
+			return '#FF4600';
+		case 2:
+			return '#FF8800';
+		case 3:
+			return '#FFAD00';
+		case 4:
+			return '#FFC500';
+		case 5:
+			return '#EEE600';
+		case 7:
+			return '#CFE600';
+		case 8:
+			return '#8CE600';
+		case 9:
+			return '#5EE600';
+		default:
+			return $author$project$Main$emptyColor;
+	}
 };
 var $elm$core$Dict$get = F2(
 	function (targetKey, dict) {
@@ -5408,64 +5447,98 @@ var $elm$core$Dict$get = F2(
 			}
 		}
 	});
-var $author$project$Main$intensityToColor = function (i) {
-	switch (i) {
-		case 0:
-			return '#FF0000';
-		case 1:
-			return '#FF4600';
-		case 2:
-			return '#FF8800';
-		case 3:
-			return '#FFAD00';
-		case 4:
-			return '#FFC500';
-		case 5:
-			return '#EEE600';
-		case 7:
-			return '#CFE600';
-		case 8:
-			return '#8CE600';
-		case 9:
-			return '#5EE600';
-		default:
-			var _default = i;
-			return 'grey';
-	}
+var $author$project$Main$highlightColor = '#b1add1ff';
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
 };
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onMouseLeave = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mouseleave',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$html$Html$Events$onMouseOver = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mouseover',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $author$project$Main$partialHighlightColor = '#e2e1eeff';
 var $elm$html$Html$td = _VirtualDom_node('td');
 var $elm$core$Debug$toString = _Debug_toString;
-var $author$project$Main$formatCell = F3(
-	function (sheet, row, col) {
-		var _v0 = A2(
+var $author$project$Main$formatCell = F4(
+	function (sheet, row, col, focus) {
+		var isPartialFocus = function () {
+			if (focus.$ === 'Just') {
+				var _v5 = focus.a;
+				var r = _v5.a;
+				var c = _v5.b;
+				return _Utils_eq(row, r) || _Utils_eq(col, c);
+			} else {
+				return false;
+			}
+		}();
+		var isFocused = function () {
+			if (focus.$ === 'Just') {
+				var _v3 = focus.a;
+				var r = _v3.a;
+				var c = _v3.b;
+				return _Utils_eq(row, r) && _Utils_eq(col, c);
+			} else {
+				return false;
+			}
+		}();
+		var contents = A2(
 			$elm$core$Dict$get,
 			_Utils_Tuple2(row, col),
 			sheet);
-		if (_v0.$ === 'Just') {
-			var content = _v0.a;
-			return A2(
-				$elm$html$Html$td,
-				A2(
-					$elm$core$List$cons,
-					A2(
-						$elm$html$Html$Attributes$style,
-						'background',
-						$author$project$Main$intensityToColor(content)),
-					$author$project$Main$cellStyle),
+		var label = function () {
+			if (contents.$ === 'Just') {
+				var i = contents.a;
+				return $elm$core$Debug$toString(i);
+			} else {
+				return ' ';
+			}
+		}();
+		var color = function () {
+			if (isFocused) {
+				return $author$project$Main$highlightColor;
+			} else {
+				if (isPartialFocus) {
+					return $author$project$Main$partialHighlightColor;
+				} else {
+					if (contents.$ === 'Just') {
+						var i = contents.a;
+						return $author$project$Main$cellColor(i);
+					} else {
+						return $author$project$Main$emptyColor;
+					}
+				}
+			}
+		}();
+		return A2(
+			$elm$html$Html$td,
+			_Utils_ap(
 				_List_fromArray(
 					[
-						$elm$html$Html$text(
-						$elm$core$Debug$toString(content))
-					]));
-		} else {
-			return A2(
-				$elm$html$Html$td,
-				$author$project$Main$cellStyle,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(' ')
-					]));
-		}
+						A2($elm$html$Html$Attributes$style, 'background', color),
+						$elm$html$Html$Events$onMouseOver(
+						A2($author$project$Main$Highlight, row, col)),
+						$elm$html$Html$Events$onMouseLeave($author$project$Main$KillHighlight)
+					]),
+				$author$project$Main$cellStyle),
+			_List_fromArray(
+				[
+					$elm$html$Html$text(label)
+				]));
 	});
 var $author$project$Main$rows = function (model) {
 	return A2(
@@ -5478,9 +5551,12 @@ var $author$project$Main$rows = function (model) {
 					$elm$core$List$cons,
 					A2(
 						$elm$html$Html$th,
-						A2(
-							$elm$core$List$cons,
-							$elm$html$Html$Attributes$scope('row'),
+						_Utils_ap(
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$scope('row'),
+									A2($elm$html$Html$Attributes$style, 'background', $author$project$Main$borderColor)
+								]),
 							$author$project$Main$cellStyle),
 						_List_fromArray(
 							[
@@ -5489,7 +5565,7 @@ var $author$project$Main$rows = function (model) {
 					A2(
 						$elm$core$List$map,
 						function (c) {
-							return A3($author$project$Main$formatCell, model.cells, r, c);
+							return A4($author$project$Main$formatCell, model.cells, r, c, model.focusCell);
 						},
 						model.column_names)));
 		},
@@ -5499,17 +5575,27 @@ var $elm$html$Html$table = _VirtualDom_node('table');
 var $author$project$Main$tableView = function (model) {
 	return A2(
 		$elm$html$Html$table,
-		_List_fromArray(
-			[
-				A2($elm$html$Html$Attributes$style, 'aspect-ratio', '1 / 1')
-			]),
+		_List_Nil,
 		_Utils_ap(
 			$author$project$Main$headers(model),
 			$author$project$Main$rows(model)));
 };
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		return model;
+		if (msg.$ === 'Highlight') {
+			var row = msg.a;
+			var col = msg.b;
+			return _Utils_update(
+				model,
+				{
+					focusCell: $elm$core$Maybe$Just(
+						_Utils_Tuple2(row, col))
+				});
+		} else {
+			return _Utils_update(
+				model,
+				{focusCell: $elm$core$Maybe$Nothing});
+		}
 	});
 var $author$project$Main$main = $elm$browser$Browser$sandbox(
 	{init: $author$project$Main$initialModel, update: $author$project$Main$update, view: $author$project$Main$tableView});

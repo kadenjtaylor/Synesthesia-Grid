@@ -51,7 +51,7 @@ type Msg
 
 cellStyle : List (Attribute Msg)
 cellStyle =
-    [ style "border" "1px solid black", style "text-align" "center", style "width" "60px", style "min-width" "60px" ]
+    [ style "border" "1px solid black", style "text-align" "center", style "width" "60px", style "min-width" "60px", style "height" "60px", style "height" "60px" ]
 
 
 columnNames : List String -> List (Html Msg)
@@ -81,7 +81,7 @@ partialHighlightColor =
 
 
 emptyColor =
-    "#f3f3f3ff"
+    "#fdfaefff"
 
 
 cellColor : Int -> String
@@ -184,7 +184,7 @@ rows model =
 tableView : Model -> Html Msg
 tableView model =
     table
-        [ style "aspect-ratio" "1 / 1" ]
+        []
         (headers model
             ++ rows model
         )
@@ -199,8 +199,8 @@ type alias Cell =
 
 initialModel : Model
 initialModel =
-    { row_names = [ "the sun", "the moon", "truth", "friendship", "intelligence", "coffee", "love", "sex", "sleep", "justice", "thinking" ]
-    , column_names = [ "bright", "loud", "spicy", "crunchy", "shrill", "rough", "smooth", "shiny", "bitter" ]
+    { row_names = [ "the sun", "the moon", "truth", "friendship", "intelligence", "coffee", "love", "sex", "sleep", "justice", "thinking", "safety", "money", "confusion", "certainty" ]
+    , column_names = [ "bright", "loud", "spicy", "crunchy", "shrill", "rough", "smooth", "shiny", "bitter", "hot", "cold", "dry", "wet", "heavy", "light", "gooey", "oily", "creamy", "salty", "blurry", "quiet" ]
     , cells =
         Dict.fromList
             [ ( ( "the sun", "spicy" ), 8 ) ]
