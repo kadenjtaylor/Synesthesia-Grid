@@ -22,3 +22,9 @@ So each cell in the grid represents a particular user's answer to the question "
 ```
 Ex: "How [spicy] is [the sun]? => 8"
 ```
+
+# TODOs
+
+- [ ] Make Label Rows Sticky to the top/left of the screen
+- [ ] click-to-edit cells
+- [ ] flipping between local and global view

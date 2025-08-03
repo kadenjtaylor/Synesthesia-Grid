@@ -168,6 +168,7 @@ formatCell sheet row col focus =
             color
          , onMouseOver (Highlight row col)
          , onMouseLeave KillHighlight
+         , style "font-size" "xx-large" 
          ]
             ++ cellStyle
         )
