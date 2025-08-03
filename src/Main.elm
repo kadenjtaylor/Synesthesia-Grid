@@ -3,9 +3,12 @@ module Main exposing (..)
 import Browser exposing (..)
 import Debug exposing (toString)
 import Dict exposing (Dict)
+import Element exposing (height, width)
+import Element.Background as Background exposing (color)
+import Element.Input as Input
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onMouseLeave, onMouseOver)
+import Html.Events exposing (onClick, onInput, onMouseLeave, onMouseOver, onSubmit)
 
 
 type alias FilledCell =
@@ -32,6 +35,7 @@ type alias Model =
     , column_names : List String
     , cells : Sheet
     , focusCell : Maybe ( String, String )
+    , editCell : Maybe ( String, String )
     }
 
 
@@ -43,6 +47,8 @@ type alias Model =
 type Msg
     = Highlight String String
     | KillHighlight
+    | EditCell String String
+    | AdjustValue String String String
 
 
 
@@ -103,26 +109,29 @@ cellColor i =
             "#FFC500"
 
         5 ->
+            "#eed600ff"
+
+        6 ->
             "#EEE600"
 
         7 ->
-            "#CFE600"
+             "#a9e600ff"
 
         8 ->
             "#8CE600"
 
         9 ->
-            "#5EE600"
+            "#04c404ff"
 
         _ ->
             emptyColor
 
 
-formatCell : Sheet -> String -> String -> Maybe ( String, String ) -> Html Msg
-formatCell sheet row col focus =
+formatCell : Sheet -> String -> String -> Maybe ( String, String ) -> Maybe ( String, String ) -> Html Msg
+formatCell sheet row col focusCell editCell =
     let
         isFocused =
-            case focus of
+            case focusCell of
                 Just ( r, c ) ->
                     row == r && col == c
 
@@ -130,9 +139,17 @@ formatCell sheet row col focus =
                     False
 
         isPartialFocus =
-            case focus of
+            case focusCell of
                 Just ( r, c ) ->
                     row == r || col == c
+
+                Nothing ->
+                    False
+
+        isEditing =
+            case editCell of
+                Just ( r, c ) ->
+                    row == r && col == c
 
                 Nothing ->
                     False
@@ -168,17 +185,54 @@ formatCell sheet row col focus =
             color
          , onMouseOver (Highlight row col)
          , onMouseLeave KillHighlight
-         , style "font-size" "xx-large" 
+         , style "font-size" "xx-large"
+         , title (String.concat [ "How ", col, " is ", row, "?" ])
+         , onClick (EditCell row col)
          ]
             ++ cellStyle
         )
-        [ text label ]
+        (if isEditing then
+            [ input [ style "font-size" "xx-large", style "max-width" "50px", style "text-align" "center", onInput (\s -> AdjustValue row col s) ] [ text label ] ]
+
+         else
+            [ text label ]
+        )
+
+
+
+-- numberInput : Element.Element Msg
+-- numberInput =
+--     Input.slider
+--         [ Element.height (Element.px 30)
+--         -- Here is where we're creating/styling the "track"
+--         , Element.behindContent
+--             (Element.el
+--                 [ Element.width Element.fill
+--                 , Element.height (Element.px 2)
+--                 , Element.centerY
+--                 ]
+--                 Element.none
+--             )
+--         ]
+--         { onChange = \f -> AdjustValue f
+--         , label =
+--             Input.labelAbove []
+--                 (Element.text
+--                     "Slider"
+--                 )
+--         , min = 0
+--         , max = 75
+--         , step = Just 1
+--         , value = 0
+--         , thumb =
+--             Input.defaultThumb
+--         }
 
 
 rows : Model -> List (Html Msg)
 rows model =
     List.map
-        (\r -> tr [] (th ([ scope "row", style "background" borderColor ] ++ cellStyle) [ text r ] :: List.map (\c -> formatCell model.cells r c model.focusCell) model.column_names))
+        (\r -> tr [] (th ([ scope "row", style "background" borderColor ] ++ cellStyle) [ text r ] :: List.map (\c -> formatCell model.cells r c model.focusCell model.editCell) model.column_names))
         model.row_names
 
 
@@ -201,11 +255,12 @@ type alias Cell =
 initialModel : Model
 initialModel =
     { row_names = [ "the sun", "the moon", "truth", "friendship", "intelligence", "coffee", "love", "sex", "sleep", "justice", "thinking", "safety", "money", "confusion", "certainty" ]
-    , column_names = [ "bright", "loud", "spicy", "crunchy", "shrill", "rough", "smooth", "shiny", "bitter", "hot", "cold", "dry", "wet", "heavy", "light", "gooey", "oily", "creamy", "salty", "blurry", "quiet" ]
+    , column_names = [ "bright", "loud", "spicy", "crunchy", "shrill", "rough", "smooth", "shiny", "bitter", "hot", "cold", "dry", "wet", "heavy", "light", "gooey", "oily", "creamy", "salty", "blurry", "quiet", "sharp", "dull" ]
     , cells =
         Dict.fromList
             [ ( ( "the sun", "spicy" ), 8 ) ]
     , focusCell = Nothing
+    , editCell = Nothing
     }
 
 
@@ -217,6 +272,21 @@ update msg model =
 
         KillHighlight ->
             { model | focusCell = Nothing }
+
+        EditCell row col ->
+            { model | focusCell = Nothing, editCell = Just ( row, col ) }
+
+        AdjustValue r c i ->
+            let
+                num =
+                    String.toInt i
+            in
+            case num of
+                Just newValue ->
+                    { model | editCell = Nothing, cells = Dict.insert ( r, c ) newValue model.cells }
+
+                Nothing ->
+                    { model | editCell = Nothing }
 
 
 main : Program () Model Msg

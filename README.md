@@ -25,6 +25,6 @@ Ex: "How [spicy] is [the sun]? => 8"
 
 # TODOs
 
-- [ ] Make Label Rows Sticky to the top/left of the screen
+- [ ] Make Label Rows Sticky to the top/left of the screen?
 - [ ] click-to-edit cells
 - [ ] flipping between local and global view

@@ -4616,7 +4616,8 @@ var $author$project$Main$initialModel = {
 				8)
 			])),
 	column_names: _List_fromArray(
-		['bright', 'loud', 'spicy', 'crunchy', 'shrill', 'rough', 'smooth', 'shiny', 'bitter', 'hot', 'cold', 'dry', 'wet', 'heavy', 'light', 'gooey', 'oily', 'creamy', 'salty', 'blurry', 'quiet']),
+		['bright', 'loud', 'spicy', 'crunchy', 'shrill', 'rough', 'smooth', 'shiny', 'bitter', 'hot', 'cold', 'dry', 'wet', 'heavy', 'light', 'gooey', 'oily', 'creamy', 'salty', 'blurry', 'quiet', 'sharp', 'dull']),
+	editCell: $elm$core$Maybe$Nothing,
 	focusCell: $elm$core$Maybe$Nothing,
 	row_names: _List_fromArray(
 		['the sun', 'the moon', 'truth', 'friendship', 'intelligence', 'coffee', 'love', 'sex', 'sleep', 'justice', 'thinking', 'safety', 'money', 'confusion', 'certainty'])
@@ -5386,6 +5387,14 @@ var $author$project$Main$headers = function (model) {
 				A2($elm$core$List$cons, ' ', model.column_names)))
 		]);
 };
+var $author$project$Main$AdjustValue = F3(
+	function (a, b, c) {
+		return {$: 'AdjustValue', a: a, b: b, c: c};
+	});
+var $author$project$Main$EditCell = F2(
+	function (a, b) {
+		return {$: 'EditCell', a: a, b: b};
+	});
 var $author$project$Main$Highlight = F2(
 	function (a, b) {
 		return {$: 'Highlight', a: a, b: b};
@@ -5405,16 +5414,21 @@ var $author$project$Main$cellColor = function (i) {
 		case 4:
 			return '#FFC500';
 		case 5:
+			return '#eed600ff';
+		case 6:
 			return '#EEE600';
 		case 7:
-			return '#CFE600';
+			return '#a9e600ff';
 		case 8:
 			return '#8CE600';
 		case 9:
-			return '#5EE600';
+			return '#04c404ff';
 		default:
 			return $author$project$Main$emptyColor;
 	}
+};
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
 };
 var $elm$core$Dict$get = F2(
 	function (targetKey, dict) {
@@ -5448,6 +5462,7 @@ var $elm$core$Dict$get = F2(
 		}
 	});
 var $author$project$Main$highlightColor = '#b1add1ff';
+var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -5459,6 +5474,45 @@ var $elm$html$Html$Events$on = F2(
 			event,
 			$elm$virtual_dom$VirtualDom$Normal(decoder));
 	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
 var $elm$html$Html$Events$onMouseLeave = function (msg) {
 	return A2(
 		$elm$html$Html$Events$on,
@@ -5473,22 +5527,33 @@ var $elm$html$Html$Events$onMouseOver = function (msg) {
 };
 var $author$project$Main$partialHighlightColor = '#e2e1eeff';
 var $elm$html$Html$td = _VirtualDom_node('td');
+var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
 var $elm$core$Debug$toString = _Debug_toString;
-var $author$project$Main$formatCell = F4(
-	function (sheet, row, col, focus) {
+var $author$project$Main$formatCell = F5(
+	function (sheet, row, col, focusCell, editCell) {
 		var isPartialFocus = function () {
-			if (focus.$ === 'Just') {
-				var _v5 = focus.a;
-				var r = _v5.a;
-				var c = _v5.b;
+			if (focusCell.$ === 'Just') {
+				var _v7 = focusCell.a;
+				var r = _v7.a;
+				var c = _v7.b;
 				return _Utils_eq(row, r) || _Utils_eq(col, c);
 			} else {
 				return false;
 			}
 		}();
 		var isFocused = function () {
-			if (focus.$ === 'Just') {
-				var _v3 = focus.a;
+			if (focusCell.$ === 'Just') {
+				var _v5 = focusCell.a;
+				var r = _v5.a;
+				var c = _v5.b;
+				return _Utils_eq(row, r) && _Utils_eq(col, c);
+			} else {
+				return false;
+			}
+		}();
+		var isEditing = function () {
+			if (editCell.$ === 'Just') {
+				var _v3 = editCell.a;
 				var r = _v3.a;
 				var c = _v3.b;
 				return _Utils_eq(row, r) && _Utils_eq(col, c);
@@ -5533,10 +5598,34 @@ var $author$project$Main$formatCell = F4(
 						$elm$html$Html$Events$onMouseOver(
 						A2($author$project$Main$Highlight, row, col)),
 						$elm$html$Html$Events$onMouseLeave($author$project$Main$KillHighlight),
-						A2($elm$html$Html$Attributes$style, 'font-size', 'xx-large')
+						A2($elm$html$Html$Attributes$style, 'font-size', 'xx-large'),
+						$elm$html$Html$Attributes$title(
+						$elm$core$String$concat(
+							_List_fromArray(
+								['How ', col, ' is ', row, '?']))),
+						$elm$html$Html$Events$onClick(
+						A2($author$project$Main$EditCell, row, col))
 					]),
 				$author$project$Main$cellStyle),
-			_List_fromArray(
+			isEditing ? _List_fromArray(
+				[
+					A2(
+					$elm$html$Html$input,
+					_List_fromArray(
+						[
+							A2($elm$html$Html$Attributes$style, 'font-size', 'xx-large'),
+							A2($elm$html$Html$Attributes$style, 'max-width', '50px'),
+							A2($elm$html$Html$Attributes$style, 'text-align', 'center'),
+							$elm$html$Html$Events$onInput(
+							function (s) {
+								return A3($author$project$Main$AdjustValue, row, col, s);
+							})
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(label)
+						]))
+				]) : _List_fromArray(
 				[
 					$elm$html$Html$text(label)
 				]));
@@ -5566,7 +5655,7 @@ var $author$project$Main$rows = function (model) {
 					A2(
 						$elm$core$List$map,
 						function (c) {
-							return A4($author$project$Main$formatCell, model.cells, r, c, model.focusCell);
+							return A5($author$project$Main$formatCell, model.cells, r, c, model.focusCell, model.editCell);
 						},
 						model.column_names)));
 		},
@@ -5583,19 +5672,52 @@ var $author$project$Main$tableView = function (model) {
 };
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		if (msg.$ === 'Highlight') {
-			var row = msg.a;
-			var col = msg.b;
-			return _Utils_update(
-				model,
-				{
-					focusCell: $elm$core$Maybe$Just(
-						_Utils_Tuple2(row, col))
-				});
-		} else {
-			return _Utils_update(
-				model,
-				{focusCell: $elm$core$Maybe$Nothing});
+		switch (msg.$) {
+			case 'Highlight':
+				var row = msg.a;
+				var col = msg.b;
+				return _Utils_update(
+					model,
+					{
+						focusCell: $elm$core$Maybe$Just(
+							_Utils_Tuple2(row, col))
+					});
+			case 'KillHighlight':
+				return _Utils_update(
+					model,
+					{focusCell: $elm$core$Maybe$Nothing});
+			case 'EditCell':
+				var row = msg.a;
+				var col = msg.b;
+				return _Utils_update(
+					model,
+					{
+						editCell: $elm$core$Maybe$Just(
+							_Utils_Tuple2(row, col)),
+						focusCell: $elm$core$Maybe$Nothing
+					});
+			default:
+				var r = msg.a;
+				var c = msg.b;
+				var i = msg.c;
+				var num = $elm$core$String$toInt(i);
+				if (num.$ === 'Just') {
+					var newValue = num.a;
+					return _Utils_update(
+						model,
+						{
+							cells: A3(
+								$elm$core$Dict$insert,
+								_Utils_Tuple2(r, c),
+								newValue,
+								model.cells),
+							editCell: $elm$core$Maybe$Nothing
+						});
+				} else {
+					return _Utils_update(
+						model,
+						{editCell: $elm$core$Maybe$Nothing});
+				}
 		}
 	});
 var $author$project$Main$main = $elm$browser$Browser$sandbox(
